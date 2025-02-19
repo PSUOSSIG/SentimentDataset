@@ -1,0 +1,11 @@
+pandas
+matplotlib
+requests
+beautifulsoup4
+nltk
+transformers
+serpapi
+GoogleSearch
+calendar
+datetime
+bs4

@@ -11,7 +11,6 @@ nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 
 # Set up the sentiment analysis pipeline using FinBERT.
-# Ensure you have the correct model available.
 sentiment_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
 
 def assign_label(sentiment_str):
@@ -88,8 +87,9 @@ def build_sentiment_dataset(urls):
       - Scrapes the article text and publication date.
       - Splits the text into sentences.
       - Randomly groups between 1 to 3 consecutive sentences to form one case.
-      - Uses FinBERT to assign sentiment for each group.
-      - Adds the raw FinBERT sentiment, its score, a numeric label, and the article date.
+      - Uses FinBERT to assign sentiment for each group, returning scores for all classes.
+      - Determines overall sentiment (highest score) and assigns a numeric label.
+      - Adds the probability scores for all sentiment types along with the article date.
     Returns a list of dictionaries representing the dataset.
     """
     dataset = []
@@ -115,18 +115,25 @@ def build_sentiment_dataset(urls):
                     continue
 
                 try:
-                    # Run sentiment analysis on the text block (truncated if needed).
-                    result = sentiment_pipeline(case_text[:512])
-                    finbert_label = result[0]['label']
-                    finbert_score = result[0]['score']
-                    numeric_label = assign_label(finbert_label)
+                    # Run sentiment analysis with return_all_scores=True.
+                    result = sentiment_pipeline(case_text[:512], return_all_scores=True)
+                    # result[0] is a list of dictionaries for each sentiment class.
+                    scores_dict = {r['label'].lower(): r['score'] for r in result[0]}
+                    # Determine the overall sentiment by selecting the label with the highest score.
+                    overall = max(result[0], key=lambda r: r['score'])
+                    overall_label = overall['label']
+                    overall_score = overall['score']
+                    numeric_label = assign_label(overall_label)
 
                     dataset.append({
                         'url': url,
                         'date': pub_date,
                         'case_text': case_text,
-                        'label': finbert_label,
-                        'score': finbert_score,
+                        'label': overall_label,
+                        'score': overall_score,
+                        'score_positive': scores_dict.get('positive'),
+                        'score_neutral': scores_dict.get('neutral'),
+                        'score_negative': scores_dict.get('negative'),
                         'numeric_label': numeric_label
                     })
                     total_cases += 1

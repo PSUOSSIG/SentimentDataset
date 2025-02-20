@@ -72,7 +72,7 @@ def main():
     '''
     REPLACE API KEY HERE WITH YOUR API KEY.
     '''
-    serpapi_key = "ea6909575c46c5473f587d3c925d6925c3f75e0d61b80fcf51814b748e8807e5"
+    serpapi_key = ""
     
     for start_date, end_date in monthly_ranges:
         time_range_str = f"{start_date} - {end_date}"

@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import datetime
 import calendar
-from serpapi import GoogleSearch  # Adjust import if needed
+from serpapi import GoogleSearch  
 
 def generate_monthly_date_ranges(start_year, start_month, end_year, end_month):
     """
@@ -53,10 +53,11 @@ def main():
     
     # Define the target sources.
     sources = [
-        "fool.com",
-        "bloomberg.com",
-        "wsj.com",
-        "cnbc.com"
+        #"forbes.com",
+        #"fool.com",
+        "wsj.com"
+        #"bloomberg.com",
+        #"cnbc.com"
     ]
     
     # For simplicity, we hard-code our time range: January 2022 through February 2025 (38 months).
@@ -71,8 +72,7 @@ def main():
     '''
     REPLACE API KEY HERE WITH YOUR API KEY.
     '''
-    # Replace with your actual SerpAPI key.
-    serpapi_key = "e69667311b8bc468e4751d2bcc5cdfb31441ff053c0497a79ce91f4c3f0816ad"
+    serpapi_key = "ea6909575c46c5473f587d3c925d6925c3f75e0d61b80fcf51814b748e8807e5"
     
     for start_date, end_date in monthly_ranges:
         time_range_str = f"{start_date} - {end_date}"
@@ -98,7 +98,7 @@ def main():
     
     # Save all the results to a CSV file.
     df = pd.DataFrame(results)
-    df.to_csv("aggregated_urls.csv", index=False)
+    df.to_csv("Scrapersandrawfiles/YFinanceData/aggregated_urls.csv", index=False)
     print(f"Saved aggregated URLs to aggregated_urls.csv. Total URLs: {len(df)}")
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import nltk
 import pandas as pd
 import random
 import re
+import time
 from transformers import pipeline
 
 # Download the NLTK tokenizer data
@@ -12,6 +13,21 @@ from nltk.tokenize import sent_tokenize
 
 # Set up the sentiment analysis pipeline using FinBERT.
 sentiment_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
+
+# List of user agents to rotate.
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+    # Add more user agents as needed.
+]
+
+# Optional: Define a list of proxies to rotate.
+PROXIES = [
+    # Example format: "http://username:password@proxyaddress:port"
+    # "http://proxy1.example.com:8080",
+    # "http://proxy2.example.com:8080",
+]
 
 def assign_label(sentiment_str):
     """
@@ -40,46 +56,72 @@ def parse_date_from_url(url):
         return f"{year}-{month}-{day}"
     return None
 
-def scrape_article(url):
+def get_random_headers():
+    """Return a headers dict with a random user agent."""
+    return {
+        "User-Agent": random.choice(USER_AGENTS),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.google.com/"
+    }
+
+def get_random_proxy():
+    """Return a random proxy from the list if available, else None."""
+    if PROXIES:
+        proxy = random.choice(PROXIES)
+        return {"http": proxy, "https": proxy}
+    return None
+
+def scrape_article(url, session, max_retries=3):
     """
     Scrapes an article's text and publication date from the given URL.
-    Attempts to extract the publication date using common meta tags or <time> elements.
-    If not found, falls back to parsing the date from the URL.
+    Incorporates random delays, user agent rotation, and retry logic.
     Returns a tuple (text_content, pub_date). If not found, pub_date may be None.
     """
-    try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # Extract text from all <p> tags.
-            paragraphs = soup.find_all('p')
-            text_content = " ".join([p.get_text() for p in paragraphs])
+    delay = random.uniform(1, 5)
+    time.sleep(delay)  # Random delay to mimic human behavior
 
-            # Try to extract the publication date from meta tags or <time> element.
-            pub_date = None
-            meta_date = soup.find("meta", property="article:published_time")
-            if meta_date and meta_date.get("content"):
-                pub_date = meta_date.get("content")
-            else:
-                meta_date = soup.find("meta", attrs={"name": "date"})
+    retries = 0
+    backoff = 1  # initial backoff in seconds
+    while retries < max_retries:
+        try:
+            headers = get_random_headers()
+            proxies = get_random_proxy()
+            response = session.get(url, headers=headers, proxies=proxies, timeout=10)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                # Extract text from all <p> tags.
+                paragraphs = soup.find_all('p')
+                text_content = " ".join([p.get_text() for p in paragraphs])
+
+                # Try to extract the publication date from meta tags or <time> element.
+                pub_date = None
+                meta_date = soup.find("meta", property="article:published_time")
                 if meta_date and meta_date.get("content"):
                     pub_date = meta_date.get("content")
-            if not pub_date:
-                time_tag = soup.find("time")
-                if time_tag:
-                    pub_date = time_tag.get("datetime") or time_tag.get_text().strip()
+                else:
+                    meta_date = soup.find("meta", attrs={"name": "date"})
+                    if meta_date and meta_date.get("content"):
+                        pub_date = meta_date.get("content")
+                if not pub_date:
+                    time_tag = soup.find("time")
+                    if time_tag:
+                        pub_date = time_tag.get("datetime") or time_tag.get_text().strip()
 
-            # Fallback: If still no date, try parsing from the URL.
-            if not pub_date:
-                pub_date = parse_date_from_url(url)
+                # Fallback: If still no date, try parsing from the URL.
+                if not pub_date:
+                    pub_date = parse_date_from_url(url)
 
-            return text_content, pub_date
-        else:
-            print(f"Error: Received status code {response.status_code} for URL: {url}")
-            return None, None
-    except Exception as e:
-        print(f"Error scraping {url}: {e}")
-        return None, None
+                return text_content, pub_date
+            else:
+                print(f"Error: Received status code {response.status_code} for URL: {url}")
+        except Exception as e:
+            print(f"Error scraping {url}: {e}")
+        # Exponential backoff before retrying
+        retries += 1
+        time.sleep(backoff)
+        backoff *= 2
+
+    return None, None
 
 def build_sentiment_dataset(urls):
     """
@@ -94,9 +136,10 @@ def build_sentiment_dataset(urls):
     """
     dataset = []
     total_cases = 0
+    session = requests.Session()  # Use a persistent session for connection pooling
 
     for url in urls:
-        article_text, pub_date = scrape_article(url)
+        article_text, pub_date = scrape_article(url, session)
         case_count = 0  # Count cases per URL
 
         if article_text:
@@ -111,7 +154,7 @@ def build_sentiment_dataset(urls):
                 case_text = " ".join(sentence_group).strip()
                 i += group_size  # Move index by the number of sentences used.
 
-                if case_text == "":
+                if not case_text:
                     continue
 
                 try:
@@ -131,9 +174,9 @@ def build_sentiment_dataset(urls):
                         'case_text': case_text,
                         'label': overall_label,
                         'score': overall_score,
-                        'score_positive': scores_dict.get('positive'),
-                        'score_neutral': scores_dict.get('neutral'),
-                        'score_negative': scores_dict.get('negative'),
+                        'positive_prob': scores_dict.get('positive'),
+                        'neutral_prob': scores_dict.get('neutral'),
+                        'negative_prob': scores_dict.get('negative'),
                         'numeric_label': numeric_label
                     })
                     total_cases += 1
@@ -151,7 +194,7 @@ def build_sentiment_dataset(urls):
 def main():
     # Load URLs from aggregated_urls.csv.
     try:
-        aggregated_urls_df = pd.read_csv("aggregated_urls.csv")
+        aggregated_urls_df = pd.read_csv("Scrapersandrawfiles/YFinanceData/aggregated_urls.csv")
         # Assuming the CSV file has a column named "url" that contains the URLs.
         urls = aggregated_urls_df["url"].dropna().tolist()
     except Exception as e:
@@ -166,8 +209,8 @@ def main():
     print(f"Total cases processed: {len(df)}")
     
     # Save the dataset to a CSV file.
-    df.to_csv("nvda_sentence_sentiment_dataset.csv", index=False)
-    print("Dataset saved to nvda_sentence_sentiment_dataset.csv")
+    df.to_csv("Scrapersandrawfiles/YFinanceData/nvda_sentence_sentiment_dataset.csv", index=False)
+    print("Dataset saved to nvda_sentence_sentiment_dataset_fool_uncleaned.csv")
 
 if __name__ == "__main__":
     main()

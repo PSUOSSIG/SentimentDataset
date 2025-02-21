@@ -1,16 +1,77 @@
-# **Initial Dataset for the testing and training for Sentiment Analysis**
+# **Semantic Analysis Dataset**
+---
+## **TL:DR**
+#### Your dataset to train on is **sentiment_data.csv** feel free to download just this raw file.
+#### Format for the CSV file
+ - **url**: URL the scraped text belongs to
+ - **date**: YYYY-MM-DD format. Date of the published article the text is from.
+ - **case_text**: Text, ranging from 1-3 sentences for granularity. **NOTE: Group by URL to get the full document text.**
+ - **label**: The categorical label for the sentiment. {positive,negative,neutral}
+ - **score**: The probability (assurance) of the correctly assigned label. (Winning label probability) 
+ - **numeric_label**: Numeric version of label. 1 = positive, 0 = neutral, -1 = negative.
+ - **positive_prob**: FinBERT's positive probability assignment. sum of all probabilities = 1.
+ - **neutral_prob**: FinBERT's neutral probability assignment. sum of all probabilities = 1.
+ - **negative_prob**: FinBERT's negative probability assignment. sum of all probabilities = 1.
+
+---
+## Dataset Summary
+This dataset was constructed by aggregating data from multiple finance websites with a focus on NVDA (NVIDIA Corporation) stock. The data collection process involved the following steps:
+
+#### Web Scraping: 
+ - URL Collection: We used SerpAPI to scrape URLs from various finance websites.
+ - Content Extraction: For each URL, we employed BeautifulSoup4 to extract individual sentences, ensuring we capture detailed and context-rich information.
+#### Sentiment Analysis:
+ - After collecting the textual data, we applied sentiment classification using FinBERT, a domain-specific adaptation of BERT optimized for financial text. This allowed us to tag each sentence with sentiment scores, providing insights into the market mood surrounding NVDA stock. **NOTE THAT THIS IS A TEMPORARY IMPLEMENTATION, AND WE ARE CURRENTLY WORKING ON OUR OWN SENTIMENT CLASSIFIER TO ACHIEVE BETTER SENTIMENT MARGINS**.
 ---
 
-Make sure you load the requirements.
+## Requirements
 
-**NLTK** Will open up a window, go ahead and select "download" at the bottom and download all the necessary libraries, as we will be working with this a lot.
+- Make sure you load the requirements from requirements.txt.
+- **NLTK** Will open up a window, go ahead and select "download" at the bottom and download all the necessary libraries, as we will be working with this a lot.
+- **Note For SerpAPI:** you *must* have your own key in order for this to work. Visit [text](https://serpapi.com/) for more info.
+- **^^**: Put at the end of descriptions to denote the csv will have the same name as others within the parent directory for modularizeability.
+---
+## **Directory Explanation: **
 
-## **Main files:**
- - *_sentiment_data.csv_*: we will use this for training and testing our model.
- - *_forbes_eda.ipynb_*: contains basic information about the dataset, and the cleaning operations performed
- - *_Scrutinize/nvda_sentence_sentiment_dataset_forbes_cleaned.csv_*: This dataset will have to be manually pruned/feature engineered/augmented for better functionality
- - *_Scraperandrawfiles/nvda_sentence_sentiment_dataset_forbes_uncleaned.csv_*: Constructed dataset based on scraped data before cleaning.
- - *_Scraperandrawfiles/URLPuller.py_*: utilizes SerpAPI to pull URLs for NVDA stock data. Currently only had enough requests for Forbes. Utilizes empty aggregated_urls.csv to work.
- - *_Scraperandrawfiles/sentimentDatasetBuilder.py_*: Constructs the nvda_sentence_sentiment_dataset.csv base. Randomly chooses between 1-3 sentences to construct cases for better generalizeability. Utilizes Fin-BERT to perform sentiment analysis and pulls dates from the URLs.
- - *_Scraperandrawfiles/aggregated_urls.csv_*: empty csv for URLPuller.py Ensure this file is not missing. Once URL puller is done, rename the csv and construct a new one. (I will come back and fix this for better operability)
+#### **Key**:
+ - **__Directories will be underlined and bolded__**
+ - **Scripts will be bolded (.py files)**
+ - __Data Cleaners and combiners will be underlined (.ipynb files).__
+ - *csv's will appear italicized*
 
+#### The following is the format for the directory:
+ - **__Archive__**: Directory that contains legacy files that have been updated since. Reserved as a backup.
+   - **hotfix.py**: Script developed to add positive, neutral, AND negative probabilities to our first dataset. Now implemented in our main script.
+ - **__FullSet__**: Directory that contains the final datasets for every individual news source, as well as a combination dataset of all news sources.
+   - **__FullSetUncombined__**: Directory that contains only the final datasets for every individual news source
+     - *nvda_sentence_sentiment_dataset_fool_cleaned.csv*: Motley fool cleaned full dataset
+     - *nvda_sentence_sentiment_dataset_forbes_cleaned.csv*: Forbes cleaned full dataset
+     - *nvda_sentence_sentiment_dataset_yfinance_cleaned.csv*: YFinance fool cleaned full 
+   - *Full_Dataset.csv*: The final **full dataset**. Is not undersampled for training. This is what we will be performing more manipulation on.
+   - __FullSet_combiner.ipynb__: combines all files inside of __FullSetUncombined__ and constructs *Full_Dataset.csv*. Contains some sanity checks.
+ - **__Scrapersandrawfiles__**: Contains all of our webscraper modules, as well as the initial pulled data from them
+   - **__ForbesData__**: Contains raw scraped csvs from Forbes.^^
+     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).^^
+     - __forbs_eda.ipynb__: Cleans the file and saves it under ../../FullSet/FullSetUncombined/nvda_sentence_sentiment_dataset_forbes_cleaned.csv for the full csv and ../../UnderSampledUncombined/sentiment_data_yfinance.csv for the undersampled partition, respectively.
+     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**setimentDatasetBuilder.py**). Is fed into __forbs_eda.ipynb__ for cleanup.^^
+   - **__MotleyFoolData__**: Contains raw scraped csvs from Motley Fool.^^
+     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).^^
+     - __forbs_eda.ipynb__: Cleans the file and saves it under ../../FullSet/FullSetUncombined/nvda_sentence_sentiment_dataset_fool_cleaned.csv for the full csv and ../../UnderSampledUncombined/sentiment_data_fool.csv for the undersampled partition, respectively.
+     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**setimentDatasetBuilder.py**). Is fed into __Motley_eda.ipynb__ for cleanup.^^
+   - **__YFinanceData__**: Contains raw scraped csvs from YFinance.
+     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).^^
+     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**setimentDatasetBuilder.py**). Is fed into __yfinanceEDA.ipynb__ for cleanup.^^
+     - __yFinanceEDA.ipynb__: Cleans the file and saves it under ../../FullSet/FullSetUncombined/nvda_sentence_sentiment_dataset_fool_cleaned.csv for the full csv and ../../UnderSampledUncombined/sentiment_data_fool.csv for the undersampled partition, respectively.
+   - **sentimentDatasetBuilder.py**: Utilizes BeautifulSoup and FinBERT to create a text dataset with sentiments. Identfiers for URL and Date are attached for sentiment and potential time series analysis. Constructs a 1-3 sentence granularity for each text case. Will save file to specified location as *nvda_sentence_sentiment_dataset.csv*. See comments inside for more information on parameters.
+   - **URLPuller.py**: Utilizes SerpAPI to pull URLs from specified websites. **Only put in 1 news site at a time into the feed. Input your API Key into this file as instructed by the comments.** Will save file to specified location as *aggregated_urls.csv*. See comments inside for more information on parameters.
+ - **__UnderSampledUncombined__**: Contains final cleaned data from every individual specified news outlet. Also contains a combiner file.
+   - *sentiment_data_fool.csv*: truncated version of *nvda_sentence_sentiment_dataset_fool_cleaned.csv*. Undersampled to balance dataset.
+   - *sentiment_data_forbes.csv*: truncated version of *nvda_sentence_sentiment_dataset_forbes_cleaned.csv*. Undersampled to balance dataset.
+   - *sentiment_data_yfinance.csv*: truncated version of *nvda_sentence_sentiment_dataset_yfinance_cleaned.csv*. Undersampled to balance dataset.
+   - __undersampled_combined.ipynb__: Aggregates all 3 of these files for construction of the final dataset for training sentiment, __sentiment_data.csv__
+ - README.md: This file.
+ - requirements.txt: Contains all of the necessary imports to ensure the functionality of the module.
+ - __sentiment_data.csv__: final training file for sentiment analysis.
+
+# Closing Note:
+This is a **WORK IN PROGRESS**, and will constantly be updated.

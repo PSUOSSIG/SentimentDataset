@@ -17,7 +17,7 @@ def generate_monthly_date_ranges(start_year, start_month, end_year, end_month):
         last_day = calendar.monthrange(current_year, current_month)[1]
         end_date = datetime.date(current_year, current_month, last_day)
         ranges.append((start_date.strftime("%m/%d/%Y"), end_date.strftime("%m/%d/%Y")))
-        # Move to the next month.
+        
         if current_month == 12:
             current_month = 1
             current_year += 1
@@ -25,7 +25,7 @@ def generate_monthly_date_ranges(start_year, start_month, end_year, end_month):
             current_month += 1
     return ranges
 
-def fetch_urls_with_date(query, source, start_date, end_date, num_results=20, serpapi_key="YOUR_SERPAPI_KEY"):
+def fetch_urls_with_date(query, source, start_date, end_date, num_results=20, serpapi_key=""):
     """
     Uses SerpAPI to search Google for URLs from a given source (domain) matching the query,
     restricted to a specific date range (MM/DD/YYYY).
@@ -48,24 +48,25 @@ def fetch_urls_with_date(query, source, start_date, end_date, num_results=20, se
     return urls
 
 def main():
-    # Define your search query.
+    # Define your search query. Change this to include queries of any ticker
     query = "NVIDIA Stock OR NVDA OR NVIDIA"
     
     # Define the target sources.
     sources = [
+        #"finance.yahoo.com"
         #"forbes.com",
         #"fool.com",
-        "wsj.com"
-        #"bloomberg.com",
-        #"cnbc.com"
+        #"wsj.com", not used due to subscription restrictions
+        #"bloomberg.com", not used due to subscription restrictions
+        #"cnbc.com", not used due to subscription restrictions
     ]
     
-    # For simplicity, we hard-code our time range: January 2022 through February 2025 (38 months).
+    # Change time range as needed. Modular implementation to be included later.
     start_year, start_month = 2022, 1
     end_year, end_month = 2025, 2
     monthly_ranges = generate_monthly_date_ranges(start_year, start_month, end_year, end_month)
     
-    # We want exactly 13 URLs per month.
+    # Change granularity as needed. This will pull any amount of urls per month
     target_per_month = 13
     results = []
     
@@ -78,6 +79,7 @@ def main():
         time_range_str = f"{start_date} - {end_date}"
         print(f"Collecting for time range: {time_range_str}")
         month_urls = []
+
         # Loop over sources until we get 13 unique URLs for this month.
         for source in sources:
             if len(month_urls) >= target_per_month:
@@ -96,7 +98,9 @@ def main():
                         break  # We have enough URLs for this month.
         print(f"Collected {len(month_urls)} URLs for time range {time_range_str}")
     
-    # Save all the results to a CSV file.
+    # Ensure that you create a new folder for whichever website you are creating within Scrapersandrawfiles. 
+    # DO NOT CHANGE CSV NAME, ONLY DIRECTORY WITHIN Scrapersandrawfiles.
+    # Eg. You can change YFinance to WSJ, if you created a WSJ folder
     df = pd.DataFrame(results)
     df.to_csv("Scrapersandrawfiles/YFinanceData/aggregated_urls.csv", index=False)
     print(f"Saved aggregated URLs to aggregated_urls.csv. Total URLs: {len(df)}")

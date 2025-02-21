@@ -22,7 +22,7 @@ USER_AGENTS = [
     # Add more user agents as needed.
 ]
 
-# Optional: Define a list of proxies to rotate.
+# Optional: Define a list of proxies to rotate, if needed
 PROXIES = [
     # Example format: "http://username:password@proxyaddress:port"
     # "http://proxy1.example.com:8080",
@@ -147,6 +147,10 @@ def build_sentiment_dataset(urls):
             i = 0
             while i < len(sentences):
                 # Randomly choose group size (1 to 3 sentences)
+                '''
+                Here you can change granularity as needed. 
+                Currently picks randomly between 1-3 sentences for robustness
+                '''
                 group_size = random.choice([1, 2, 3])
                 # Ensure we don't go out of bounds.
                 sentence_group = sentences[i:i+group_size]
@@ -179,6 +183,7 @@ def build_sentiment_dataset(urls):
                         'negative_prob': scores_dict.get('negative'),
                         'numeric_label': numeric_label
                     })
+
                     total_cases += 1
                     case_count += 1
                 except Exception as e:
@@ -194,7 +199,7 @@ def build_sentiment_dataset(urls):
 def main():
     # Load URLs from aggregated_urls.csv.
     try:
-        aggregated_urls_df = pd.read_csv("Scrapersandrawfiles/YFinanceData/aggregated_urls.csv")
+        aggregated_urls_df = pd.read_csv("Scrapersandrawfiles/ForbesData/aggregated_urls_forbes.csv")
         # Assuming the CSV file has a column named "url" that contains the URLs.
         urls = aggregated_urls_df["url"].dropna().tolist()
     except Exception as e:
@@ -208,9 +213,11 @@ def main():
     df = pd.DataFrame(dataset)
     print(f"Total cases processed: {len(df)}")
     
-    # Save the dataset to a CSV file.
-    df.to_csv("Scrapersandrawfiles/YFinanceData/nvda_sentence_sentiment_dataset.csv", index=False)
-    print("Dataset saved to nvda_sentence_sentiment_dataset_fool_uncleaned.csv")
+    # Ensure that you create a new folder for whichever website you are creating within Scrapersandrawfiles. 
+    # DO NOT CHANGE CSV NAME, ONLY DIRECTORY WITHIN Scrapersandrawfiles.
+    # Eg. You can change ForbesData to WSJ, if you created a WSJ folder
+    df.to_csv("Scrapersandrawfiles/ForbesData/nvda_sentence_sentiment_dataset.csv", index=False)
+    print("Dataset saved to nvda_sentence_sentiment_dataset_forbes_uncleaned.csv")
 
 if __name__ == "__main__":
     main()

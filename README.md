@@ -22,6 +22,8 @@ This dataset was constructed by aggregating data from multiple finance websites 
  - Content Extraction: For each URL, we employed BeautifulSoup4 to extract individual sentences, ensuring we capture detailed and context-rich information.
 #### Sentiment Analysis:
  - After collecting the textual data, we applied sentiment classification using FinBERT, a domain-specific adaptation of BERT optimized for financial text. This allowed us to tag each sentence with sentiment scores, providing insights into the market mood surrounding NVDA stock. **NOTE THAT THIS IS A TEMPORARY IMPLEMENTATION, AND WE ARE CURRENTLY WORKING ON OUR OWN SENTIMENT CLASSIFIER TO ACHIEVE BETTER SENTIMENT MARGINS**.
+
+### **The current implementation DOES NOT WORK for daily updates. This will come in a future implementation. Please only use the following for bulk data gathering.**
 ---
 
 ## Requirements

@@ -30,7 +30,6 @@ This dataset was constructed by aggregating data from multiple finance websites 
 - **NLTK** Will open up a window, go ahead and select "download" at the bottom and download all the necessary libraries, as we will be working with this a lot.
 - **Note For SerpAPI:** you *must* have your own key in order for this to work. Visit [SerpAPI](https://serpapi.com/) for more info.
 - **^^**: Put at the end of descriptions to denote the csv will have the same name as others within the parent directory for modularizeability.
-- ***<u>sentiment_data.csv</u>***: denotes the final dataset.
 ---
 ## **Directory Explanation: **
 
@@ -51,17 +50,17 @@ This dataset was constructed by aggregating data from multiple finance websites 
    - *Full_Dataset.csv*: The final **full dataset**. Is not undersampled for training. This is what we will be performing more manipulation on.
    - <u>FullSet_combiner.ipynb</u>: combines all files inside of **<u>FullSetUncombined</u>** and constructs *Full_Dataset.csv*. Contains some sanity checks.
  - **<u>Scrapersandrawfiles</u>**: Contains all of our webscraper modules, as well as the initial pulled data from them
-   - **<u>ForbesData</u>**: Contains raw scraped csvs from Forbes.**^^**
-     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**sentimentDatasetBuilder.py**).**^^**
+   - **<u>ForbesData</u>**: Contains raw scraped csvs from Forbes.^^
+     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**sentimentDatasetBuilder.py**).^^
      - <u>forbs_eda.ipynb</u>: Cleans the file and saves it under ../../FullSet/FullSetUncombined/nvda_sentence_sentiment_dataset_forbes_cleaned.csv for the full csv and ../../UnderSampledUncombined/sentiment_data_yfinance.csv for the undersampled partition, respectively.
-     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**sentimentDatasetBuilder.py**). Is fed into <u>forbs_eda.ipynb</u> for cleanup.**^^**
-   - **<u>MotleyFoolData</u>**: Contains raw scraped csvs from Motley Fool.**^^**
-     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).**^^**
+     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**sentimentDatasetBuilder.py**). Is fed into <u>forbs_eda.ipynb</u> for cleanup.^^
+   - **<u>MotleyFoolData</u>**: Contains raw scraped csvs from Motley Fool.^^
+     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).^^
      - <u>forbs_eda.ipynb</u>: Cleans the file and saves it under ../../FullSet/FullSetUncombined/nvda_sentence_sentiment_dataset_fool_cleaned.csv for the full csv and ../../UnderSampledUncombined/sentiment_data_fool.csv for the undersampled partition, respectively.
-     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**sentimentDatasetBuilder.py**). Is fed into <u>Motley_eda.ipynb</u> for cleanup.**^^**
-   - **<u>YFinanceData</u>**: Contains raw scraped csvs from YFinance.**^^**
-     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).**^^**
-     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**setimentDatasetBuilder.py**). Is fed into <u>yfinanceEDA.ipynb</u> for cleanup.**^^**
+     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**sentimentDatasetBuilder.py**). Is fed into <u>Motley_eda.ipynb</u> for cleanup.^^
+   - **<u>YFinanceData</u>**: Contains raw scraped csvs from YFinance.
+     - *aggregated_urls.csv*: List of csv's provided by SerpAPI (**URLPuller.py**). This is fed into our BeatifulSoup4 dataset builder (**setimentDatasetBuilder.py**).^^
+     - *nvda_sentence_sentiment_dataset.csv*: Output from the dataset builder (**setimentDatasetBuilder.py**). Is fed into <u>yfinanceEDA.ipynb</u> for cleanup.^^
      - <u>yFinanceEDA.ipynb</u>: Cleans the file and saves it under ../../FullSet/FullSetUncombined/nvda_sentence_sentiment_dataset_fool_cleaned.csv for the full csv and ../../UnderSampledUncombined/sentiment_data_fool.csv for the undersampled partition, respectively.
    - **sentimentDatasetBuilder.py**: Utilizes BeautifulSoup and FinBERT to create a text dataset with sentiments. Identfiers for URL and Date are attached for sentiment and potential time series analysis. Constructs a 1-3 sentence granularity for each text case. Will save file to specified location as *nvda_sentence_sentiment_dataset.csv*. See comments inside for more information on parameters.
    - **URLPuller.py**: Utilizes SerpAPI to pull URLs from specified websites. **Only put in 1 news site at a time into the feed. Input your API Key into this file as instructed by the comments.** Will save file to specified location as *aggregated_urls.csv*. See comments inside for more information on parameters.
@@ -69,10 +68,10 @@ This dataset was constructed by aggregating data from multiple finance websites 
    - *sentiment_data_fool.csv*: truncated version of *nvda_sentence_sentiment_dataset_fool_cleaned.csv*. Undersampled to balance dataset.
    - *sentiment_data_forbes.csv*: truncated version of *nvda_sentence_sentiment_dataset_forbes_cleaned.csv*. Undersampled to balance dataset.
    - *sentiment_data_yfinance.csv*: truncated version of *nvda_sentence_sentiment_dataset_yfinance_cleaned.csv*. Undersampled to balance dataset.
-   - <u>undersampled_combined.ipynb</u>: Aggregates all 3 of these files for construction of the final dataset for training sentiment, ***<u>sentiment_data.csv</u>***
+   - <u>undersampled_combined.ipynb</u>: Aggregates all 3 of these files for construction of the final dataset for training sentiment, <u>sentiment_data.csv</u>
  - README.md: This file.
  - requirements.txt: Contains all of the necessary imports to ensure the functionality of the module.
- - ***<u>sentiment_data.csv</u>***: final training file for sentiment analysis.
+ - <u>sentiment_data.csv</u>: final training file for sentiment analysis.
 
 # Closing Note:
 This is a **WORK IN PROGRESS**, and will constantly be updated.

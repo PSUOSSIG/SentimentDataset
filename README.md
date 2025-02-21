@@ -30,7 +30,7 @@ This dataset was constructed by aggregating data from multiple finance websites 
 - **NLTK** Will open up a window, go ahead and select "download" at the bottom and download all the necessary libraries, as we will be working with this a lot.
 - **Note For SerpAPI:** you *must* have your own key in order for this to work. Visit [SerpAPI](https://serpapi.com/) for more info.
 ---
-## **Directory Explanation: **
+## **Directory Explanation:**
 
 #### **Key**:
  - ***<u>Directories will be bolded and italicized</u>***
